@@ -15,10 +15,10 @@ class One_Order_Book:
     def get_next_data(self, N):
         time = self.df.iloc[self.current_idx]['lob']['localtime']
         price = self.df.iloc[self.current_idx]['lob']['last_price']
-        ask_price = self.df.iloc[self.current_idx]['lob']['askprice'][0:3]
-        ask_volume = self.df.iloc[self.current_idx]['lob']['askvolume'][0:3]
         bid_price = self.df.iloc[self.current_idx]['lob']['bidprice'][0:3]
         bid_volume = self.df.iloc[self.current_idx]['lob']['bidvolume'][0:3]
+        ask_price = self.df.iloc[self.current_idx]['lob']['askprice'][0:3]
+        ask_volume = self.df.iloc[self.current_idx]['lob']['askvolume'][0:3]
         trade_volume = self.df.iloc[self.current_idx]['lob']['trade_volume']
         # print(price)
         # next_price = self.df.iloc[self.current_idx+1]['lob']['last_price'] if self.current_idx < self.__len__()-1 else price
@@ -32,62 +32,51 @@ class One_Order_Book:
         print(self.df.iloc[self.current_idx]['lob']['localtime'])
         print(self.df.iloc[self.current_idx]['lob']['askprice'][0:3])
 
-    
-    def _get_data(self):
-        path = os.sep.join(['第三期股票模拟交易所', 'dataset', str(self.day), self.name])
-        data = pd.read_csv(path)
-        
-        self.price_list = data['LastPrice'].tolist()
-        # idx = sum(np.array(self.price_list)==0)
-        self.time_list = data['LocalTime'].tolist()
-        self.trade_volume = data['TradeVolume'].tolist()
-        self.trade_value = data['TradeValue'].tolist()
-        bid_query = data.columns[4:14]
-        ask_query = data.columns[14:24]
-        self.bid_price = data[bid_query]
-        self.ask_price = data[ask_query]
-        self.bid_volume = data[data.columns[24:34]]
-        self.ask_volume = data[data.columns[34:44]]
+def get_data1(order_book, N):
+    price = []
+    bid1_price = []
+    ask1_price = []
+    bid1_volume = []
+    ask1_volume = []
+    timeline = []
 
-        # print(self.ask_volume.loc[1].tolist())
-        return 
-
-
-
-class One_stock_true:
-    def __init__(self, name='stock_27.jsonl'):
-        self.df = pd.read_json(name, lines=True)
-        # print(df)
-    def __len__(self):
-        return len(self.df)
-    def begin(self):
-        self.current_idx = 0
-    def get_next_data(self):
-        price = self.df.iloc[self.current_idx]['lob']['last_price']
-        ask_price = self.df.iloc[self.current_idx]['lob']['askprice']
-        ask_volume = self.df.iloc[self.current_idx]['lob']['askvolume']
-        bid_price = self.df.iloc[self.current_idx]['lob']['bidprice']
-        bid_volume = self.df.iloc[self.current_idx]['lob']['bidvolume']
-        # print(price)
-        next_price = self.df.iloc[self.current_idx+1]['lob']['last_price'] if self.current_idx < self.__len__()-1 else price
-        self.current_idx += 1
-        return {'price':price, 'next_price':next_price, 'bid_volume':bid_volume, 'ask_price':ask_price, \
-            'ask_volume':ask_volume, 'bid_price':bid_price}, self.current_idx == self.__len__()
-
-
-
-
-if __name__ == '__main__':
-    dataset = One_stock_true()
-    price_list = []
     end_flag = 0
-    dataset.begin()
+    order_book.begin()
     while not end_flag:
-        return_dict, end_flag = dataset.get_next_data()
-        # print
-        price = return_dict['price']
-        # print(price)
-        price_list.append(price)
-    
-    plt.plot(price_list)
-    plt.show()
+        return_dict, end_flag = order_book.get_next_data(N)
+        price.append(return_dict['price'])
+        bid1_price.append(return_dict['bid_price'][0])
+        ask1_price.append(return_dict['ask_price'][0])
+        bid1_volume.append(return_dict['bid_volume'][0])
+        ask1_volume.append(return_dict['ask_volume'][0])
+        timeline.append(return_dict['time'])
+        # state_volume = return_dict['trade_volume']
+        
+    return np.array(timeline), np.array(price), np.array(bid1_price), np.array(ask1_price), \
+        np.array(bid1_volume), np.array(ask1_volume)
+
+def get_data_m(order_book, N):
+    bid2_price = []
+    ask2_price = []
+    bid2_volume = []
+    ask2_volume = []
+    bid3_price = []
+    ask3_price = []
+    bid3_volume = []
+    ask3_volume = []
+
+    end_flag = 0
+    order_book.begin()
+    while not end_flag:
+        return_dict, end_flag = order_book.get_next_data(N)
+        bid2_price.append(return_dict['bid_price'][1])
+        ask2_price.append(return_dict['ask_price'][1])
+        bid2_volume.append(return_dict['bid_volume'][1])
+        ask2_volume.append(return_dict['ask_volume'][1])
+        bid3_price.append(return_dict['bid_price'][2])
+        ask3_price.append(return_dict['ask_price'][2])
+        bid3_volume.append(return_dict['bid_volume'][2])
+        ask3_volume.append(return_dict['ask_volume'][2])
+        # state_volume = return_dict['trade_volume']
+    return np.array(bid2_volume), np.array(bid3_volume), np.array(ask2_volume), np.array(ask3_volume), \
+        np.array(bid2_price), np.array(bid3_price), np.array(ask2_price), np.array(ask3_price)
