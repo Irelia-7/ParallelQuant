@@ -27,7 +27,6 @@ def weighted_OBI(time, start, end, bid1, bid2, bid3, ask1, ask2, ask3, weight = 
     OBI = (weighted_ask - weighted_bid)/(weighted_ask + weighted_bid)
     return OBI, weighted_depth_ratio
 
-# TODO: Generate data
 # 完善Label标注，同时生成训练数据
 # 注意所有可调参数：预期最长fill时间-traded_time, rise_ratio的before time, Depth权重
 def generate_factor(time, start, end, ask1_price, before_time, ask1_v, ask2_v, ask3_v, bid1_v, bid2_v, bid3_v):
@@ -50,13 +49,12 @@ def generate_factor(time, start, end, ask1_price, before_time, ask1_v, ask2_v, a
 
     return np.array(rise_ratio), np.array(w_OBI), np.array(w_depth)
 
-# TODO: Generate label
 def get_trade_label(time, bid, ask, start, end, period, fee = 0.01):
     label = []
-    index_start = np.where(time >= start)[0][0]
-    index_end = np.where(time <= end)[0][-1]
+    index_start = np.where(time >= start)[0][0]        
+    index_end = np.where(time <= end)[0][-1]                 
     for i in range(index_start, index_end + 1, 1):
-        index = np.where(time <= time[i] + 7 * period)[0][-1]
+        index = np.where(time <= time[i] + 7 * period)[0][-1]       
         if bid[i] > (min(ask[i: index + 1]) + fee): label.append(1)
         else: label.append(0)
-    return label
+    return np.array(label)
